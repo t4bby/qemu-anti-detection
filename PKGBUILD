@@ -1,4 +1,3 @@
-# $Id: PKGBUILD,v 1.23 2008/03/27 19:46:24 tpowa Exp $
 # Maintainer: Thomas B�chler <thomas@archlinux.org>
 pkgname=qemu
 pkgver=0.9.1
