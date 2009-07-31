@@ -1,6 +1,6 @@
 # Maintainer: Tobias Powalowski <tpowa@archlinux.org>
 pkgname=qemu
-pkgver=0.10.5
+pkgver=0.10.6
 pkgrel=1
 pkgdesc="QEMU is a generic and open source processor emulator which achieves a good emulation speed by using dynamic translation."
 arch=(i686 x86_64)
@@ -26,6 +26,6 @@ build()
   install -D -m644 ${srcdir}/65-kvm.rules \
                    ${pkgdir}/lib/udev/rules.d/65-kvm.rules
 }
-md5sums=('60060feb98c9649a5da8b136685f76ba'
+md5sums=('e28f4b2d6faef178da44c03224feecb6'
          'cead7ba387159d360f892281499975df'
          'ec06591830b8fcf53913f05f3d66f7e5')
