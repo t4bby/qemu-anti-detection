@@ -1,7 +1,7 @@
 # Maintainer: Tobias Powalowski <tpowa@archlinux.org>
 pkgname=qemu
-pkgver=0.15.0
-pkgrel=2
+pkgver=0.15.1
+pkgrel=1
 pkgdesc="A generic and open source processor emulator which achieves a good emulation speed by using dynamic translation."
 arch=('i686' 'x86_64')
 license=('GPL2' 'LGPL2.1')
@@ -39,5 +39,5 @@ package() {
     done
 
 }
-md5sums=('dbc55b014bcd21b98e347f6a90f7fb6d'
+md5sums=('34f17737baaf1b3495c89cd6d4a607ed'
          'b316a066d2f1bb57d8f5b7ea1d0d1caf')
