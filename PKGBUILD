@@ -1,7 +1,7 @@
 # Maintainer: Tobias Powalowski <tpowa@archlinux.org>
 pkgname=('qemu' 'libcacard')
 pkgver=1.6.0
-pkgrel=4
+pkgrel=5
 arch=('i686' 'x86_64')
 license=('GPL2' 'LGPL2.1')
 url="http://wiki.qemu.org/Index.html"
@@ -53,6 +53,7 @@ package_qemu() {
       esac
     done
   # remove libcacard files
+  rm -rf ${pkgdir}/usr/include/cacard
   rm -rf ${pkgdir}/usr/lib/libcacard*
   rm -rf ${pkgdir}/usr/lib/pkgconfig/libcacard.pc
   rm -rf ${pkgdir}/usr/bin/vscclient
@@ -64,6 +65,8 @@ package_libcacard() {
  depends=('nss' 'libaio' 'libcap-ng' 'libiscsi' 'curl' 'vde2')
  mkdir -p ${pkgdir}/usr/bin
  mkdir -p ${pkgdir}/usr/lib/pkgconfig
+ mkdir -p ${pkgdir}/usr/include/cacard
+ cp -a ${srcdir}/qemu-${pkgver}/libcacard/*.h ${pkgdir}/usr/include/cacard/
  cp -a ${srcdir}/qemu-${pkgver}/.libs/libcacard.so* ${pkgdir}/usr/lib/
  cp -a ${srcdir}/qemu-${pkgver}/libcacard.pc ${pkgdir}/usr/lib/pkgconfig/
  cp -a ${srcdir}/qemu-${pkgver}/.libs/vscclient ${pkgdir}/usr/bin/
