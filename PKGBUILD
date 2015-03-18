@@ -1,7 +1,7 @@
 # Maintainer: Tobias Powalowski <tpowa@archlinux.org>
 pkgname=('qemu' 'libcacard')
-pkgver=2.2.0
-pkgrel=2
+pkgver=2.2.1
+pkgrel=1
 arch=('i686' 'x86_64')
 license=('GPL2' 'LGPL2.1')
 url="http://wiki.qemu.org/Index.html"
@@ -10,7 +10,6 @@ makedepends=('pixman' 'libjpeg' 'libpng' 'sdl' 'alsa-lib' 'nss' 'glib2'
              'libgl' 'libpulse' 'seabios' 'libcap-ng' 'libaio' 'libseccomp'
              'libiscsi' 'libcacard' 'spice' 'spice-protocol' 'python2'
              'usbredir')
-replaces=('qemu-kvm')
 options=(!strip)
 source=(http://wiki.qemu.org/download/${pkgname}-${pkgver}.tar.bz2
         65-kvm.rules)
@@ -39,6 +38,8 @@ package_qemu() {
          'libgl' 'libpulse' 'seabios' 'libcap-ng' 'libaio' 'libseccomp'
          'libiscsi' 'libcacard' 'spice' 'usbredir')
   backup=('etc/qemu/target-x86_64.conf')
+  replaces=('qemu-kvm')
+  optdepends=('samba: for SMB Server support')
   install=qemu.install
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" libexecdir="/usr/lib/qemu" install
@@ -87,5 +88,5 @@ package_libcacard() {
  cp -a ${srcdir}/qemu-${pkgver}/libcacard.pc ${pkgdir}/usr/lib/pkgconfig/
  cp -a ${srcdir}/qemu-${pkgver}/.libs/vscclient ${pkgdir}/usr/bin/
 }
-md5sums=('f7a5e2da22d057eb838a91da7aff43c8'
+md5sums=('833ff4457062456d38d6567f802ffef4'
          '33ab286a20242dda7743a900f369d68a')
