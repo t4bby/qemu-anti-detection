@@ -53,8 +53,7 @@ build() {
     --disable-gtk \
     --disable-vte \
     --disable-opengl \
-    --disable-virglrenderer \
-    --disable-brlapi
+    --disable-virglrenderer
 }
 
 _build() (
