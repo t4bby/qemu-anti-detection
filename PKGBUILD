@@ -149,17 +149,21 @@ _qemu_system_deps=(
   zstd libzstd.so
 )
 
-_qemu_common_optdepends=(
+_qemu_full_optdepends=(
   'qemu-user-static: for static user mode emulation of QEMU targets'
   'samba: for SMB/CIFS server support'
 )
 
 _qemu_desktop_optdepends=(
-  "${_qemu_common_optdepends[@]}"
+  "${_qemu_full_optdepends[@]}"
   'qemu-block-gluster: for Gluster block driver'
   'qemu-block-iscsi: for iSCSI block driver'
   'qemu-chardev-baum: for Baum chardev driver'
   'qemu-docs: for documentation'
+  'qemu-emulators-full: for all system emulators'
+  'qemu-full: for a full QEMU installation'
+  'qemu-pr-helper: for persistent reservation utility'
+  'qemu-s390x-virtio-gpu-ccw: for s390x-virtio-gpu-ccw display device'
   'qemu-system-aarch64: for AARCH64 system emulator'
   'qemu-system-alpha: for Alpha system emulator'
   'qemu-system-arm: for ARM system emulator'
@@ -180,9 +184,8 @@ _qemu_desktop_optdepends=(
   'qemu-system-tricore: for tricore system emulator'
   'qemu-system-xtensa: for Xtensa system emulator'
   'qemu-tests: for QEMU tests'
+  'qemu-tools: for QEMU tools'
   'qemu-user: for user mode emulation of QEMU targets'
-  'qemu-user-static: for static user mode emulation of QEMU targets'
-  'samba: for SMB/CIFS server support'
 )
 
 _qemu_base_optdepends=(
@@ -193,11 +196,31 @@ _qemu_base_optdepends=(
   'qemu-audio-oss: for OSS audio driver'
   'qemu-audio-pa: for PulseAudio audio driver'
   'qemu-audio-sdl: for SDL audio driver'
+  'qemu-audio-spice: for spice audio driver'
+  'qemu-block-curl: for curl block driver'
+  'qemu-block-dmg: for DMG block driver'
+  'qemu-block-nfs: for NFS block driver'
+  'qemu-block-ssh: for SSH block driver'
+  'qemu-chardev-spice: for the spice chardev driver'
+  'qemu-desktop: for dependencies commonly used on a desktop'
+  'qemu-hw-display-virtio-vga: for the virtio-vga display device'
+  'qemu-hw-display-virtio-vga-gl: for the virtio-vga-gl display device'
+  'qemu-hw-display-qxl: for the QXL display device'
+  'qemu-hw-display-virtio-gpu: for the virtio-gpu display device'
+  'qemu-hw-display-virtio-gpu-gl: for the virtio-gpu-gl display device'
+  'qemu-hw-display-virtio-gpu-pci: for the virtio-gpu-pci display device'
+  'qemu-hw-display-virtio-gpu-pci-gl: for the virtio-gpu-pci-gl display device'
+  'qemu-hw-usb-host: for host USB support'
+  'qemu-hw-usb-redirect: for USB redirect support'
+  'qemu-hw-usb-smartcard: for USB smartcard support'
+  'qemu-ui-curses: for ncurses UI driver'
   'qemu-ui-dbus: for D-Bus UI driver'
   'qemu-ui-egl-headless: for EGL headless UI driver'
   'qemu-ui-gtk: for GTK UI driver'
   'qemu-ui-opengl: for OpenGL UI driver'
   'qemu-ui-sdl: for SDL UI driver'
+  'qemu-ui-spice-app: for spice app UI driver'
+  'qemu-ui-spice-core: for spice core UI driver'
   'qemu-user: for user mode emulation of QEMU targets'
   'qemu-vhost-user-gpu: for vhost-user-gpu display device'
 )
@@ -1025,50 +1048,29 @@ package_qemu-base() {
   pkgdesc="A basic QEMU setup for headless environments"
   depends=(
     qemu-common=$pkgver-$pkgrel
-    qemu-audio-spice=$pkgver-$pkgrel
-    qemu-block-{curl,dmg,nfs,ssh}=$pkgver-$pkgrel
-    qemu-chardev-spice=$pkgver-$pkgrel
-    qemu-hw-display-{qxl,virtio-gpu{,-{gl,pci,pci-gl}}}=$pkgver-$pkgrel
-    qemu-hw-display-virtio-vga{,-gl}=$pkgver-$pkgrel
-    qemu-hw-s390x-virtio-gpu-ccw=$pkgver-$pkgrel
-    qemu-hw-usb-{host,redirect,smartcard}=$pkgver-$pkgrel
     qemu-img=$pkgver-$pkgrel
-    qemu-pr-helper=$pkgver-$pkgrel
     qemu-system-x86=$pkgver-$pkgrel
-    qemu-tools=$pkgver-$pkgrel
-    qemu-ui-{curses,spice-{app,core}}=$pkgver-$pkgrel
     virtiofsd
   )
   optdepends=("${_qemu_base_optdepends[@]}")
-  # TODO: remove conflicts/provides/replaces for qemu-headless after 2022-10-01
-  conflicts=(qemu qemu-headless)
-  provides=(qemu=$pkgver qemu-headless)
-  replaces=(qemu-headless)
+  provides=(qemu=$pkgver)
 }
 
 package_qemu-desktop() {
   pkgdesc="A QEMU setup for desktop environments"
   depends=(
-    qemu-common=$pkgver-$pkgrel
+    qemu-base=$pkgver-$pkgrel
     qemu-audio-{alsa,dbus,jack,oss,pa,sdl,spice}=$pkgver-$pkgrel
     qemu-block-{curl,dmg,nfs,ssh}=$pkgver-$pkgrel
     qemu-chardev-spice=$pkgver-$pkgrel
     qemu-hw-display-{qxl,virtio-gpu{,-{gl,pci,pci-gl}}}=$pkgver-$pkgrel
     qemu-hw-display-virtio-vga{,-gl}=$pkgver-$pkgrel
-    qemu-hw-s390x-virtio-gpu-ccw=$pkgver-$pkgrel
     qemu-hw-usb-{host,redirect,smartcard}=$pkgver-$pkgrel
-    qemu-img=$pkgver-$pkgrel
-    qemu-pr-helper=$pkgver-$pkgrel
-    qemu-system-x86=$pkgver-$pkgrel
-    qemu-tools=$pkgver-$pkgrel
     qemu-ui-{curses,dbus,egl-headless,gtk,opengl,sdl,spice-{app,core}}=$pkgver-$pkgrel
     qemu-vhost-user-gpu=$pkgver-$pkgrel
-    virtiofsd
   )
   optdepends=("${_qemu_desktop_optdepends[@]}")
-  conflicts=(qemu)
   provides=(qemu=$pkgver)
-  replaces=('qemu<7')
 }
 
 package_qemu-emulators-full() {
@@ -1077,35 +1079,24 @@ package_qemu-emulators-full() {
     qemu-system-{aarch64,alpha,arm,avr,cris,hppa,loongarch64,m68k,microblaze,mips,nios2,or1k,ppc,riscv,rx,s390x,sh4,sparc,tricore,x86,xtensa}=$pkgver-$pkgrel
     qemu-user=$pkgver-$pkgrel
   )
-  # TODO: remove conflicts/provides/replaces after 2022-10-01
-  conflicts=(qemu-arch-extra qemu-headless-arch-extra)
-  provides=(qemu-arch-extra qemu-headless-arch-extra)
-  replaces=(qemu-arch-extra qemu-headless-arch-extra)
 }
 
 package_qemu-full() {
   pkgdesc="A full QEMU setup"
   depends=(
-    qemu-common=$pkgver-$pkgrel
     qemu-audio-{alsa,dbus,jack,oss,pa,sdl,spice}=$pkgver-$pkgrel
-    qemu-block-{curl,dmg,gluster,iscsi,nfs,ssh}=$pkgver-$pkgrel
-    qemu-chardev-{baum,spice}=$pkgver-$pkgrel
+    qemu-block-{gluster,iscsi}=$pkgver-$pkgrel
+    qemu-chardev-baum=$pkgver-$pkgrel
+    qemu-desktop=$pkgver-$pkgrel
     qemu-docs=$pkgver-$pkgrel
-    qemu-hw-display-{qxl,virtio-{gpu{,-{gl,pci,pci-gl}},vga{,-gl}}}=$pkgver-$pkgrel
+    qemu-emulators-full=$pkgver-$pkgrel
     qemu-hw-s390x-virtio-gpu-ccw=$pkgver-$pkgrel
-    qemu-hw-usb-{host,redirect,smartcard}=$pkgver-$pkgrel
-    qemu-img=$pkgver-$pkgrel
     qemu-pr-helper=$pkgver-$pkgrel
-    qemu-system-{aarch64,alpha,arm,avr,cris,hppa,loongarch64,m68k,microblaze,mips,nios2,or1k,ppc,riscv,rx,s390x,sh4,sparc,tricore,x86,xtensa}=$pkgver-$pkgrel
     qemu-tests=$pkgver-$pkgrel
     qemu-tools=$pkgver-$pkgrel
-    qemu-ui-{curses,dbus,egl-headless,gtk,opengl,sdl,spice-{app,core}}=$pkgver-$pkgrel
     qemu-user=$pkgver-$pkgrel
-    qemu-vhost-user-gpu=$pkgver-$pkgrel
-    virtiofsd
   )
-  optdepends=("${_qemu_common_optdepends[@]}")
-  conflicts=(qemu)
+  optdepends=("${_qemu_full_optdepends[@]}")
   provides=(qemu=$pkgver)
 }
 
