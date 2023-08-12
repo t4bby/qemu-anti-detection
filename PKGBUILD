@@ -25,7 +25,7 @@ pkgname=(
   qemu-{base,desktop,emulators-full,full}
 )
 pkgver=8.0.4
-pkgrel=1
+pkgrel=2
 pkgdesc="A generic and open source machine emulator and virtualizer"
 arch=(x86_64)
 url="https://www.qemu.org/"
@@ -162,8 +162,8 @@ _qemu_desktop_optdepends=(
   'qemu-docs: for documentation'
   'qemu-emulators-full: for all system emulators'
   'qemu-full: for a full QEMU installation'
+  'qemu-hw-s390x-virtio-gpu-ccw: for s390x-virtio-gpu-ccw display device'
   'qemu-pr-helper: for persistent reservation utility'
-  'qemu-s390x-virtio-gpu-ccw: for s390x-virtio-gpu-ccw display device'
   'qemu-system-aarch64: for AARCH64 system emulator'
   'qemu-system-alpha: for Alpha system emulator'
   'qemu-system-arm: for ARM system emulator'
