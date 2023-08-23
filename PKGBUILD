@@ -5,7 +5,7 @@
 pkgbase=qemu
 pkgname=(
   qemu-common
-  qemu-audio-{alsa,dbus,jack,oss,pa,sdl,spice}
+  qemu-audio-{alsa,dbus,jack,oss,pa,pipewire,sdl,spice}
   qemu-block-{curl,dmg,gluster,iscsi,nfs,ssh}
   qemu-chardev-{baum,spice}
   qemu-docs
@@ -24,12 +24,28 @@ pkgname=(
   qemu-vhost-user-gpu
   qemu-{base,desktop,emulators-full,full}
 )
-pkgver=8.0.4
-pkgrel=2
+pkgver=8.1.0
+pkgrel=1
 pkgdesc="A generic and open source machine emulator and virtualizer"
 arch=(x86_64)
 url="https://www.qemu.org/"
-license=(GPL2 LGPL2.1)
+license=(
+  Apache-2.0
+  BSD-2-Clause
+  BSD-3-Clause
+  FSFAP
+  GPL-1.0-or-later
+  GPL-2.0-only
+  GPL-2.0-or-later
+  'GPL-2.0-or-later with GCC-exception-2.0 exception'
+  LGPL-2.0-only
+  LGPL-2.0-or-later
+  LGPL-2.1-only
+  LGPL-2.1-or-later
+  MIT
+  public-domain
+  CC-BY-3.0
+)
 # TODO: consider providing rdma-core
 # TODO: consider providing lzfse
 # TODO: package systemtap
@@ -59,6 +75,7 @@ makedepends=(
   libepoxy
   libiscsi
   libnfs
+  libpipewire
   libpng
   libpulse
   libsasl
@@ -73,6 +90,7 @@ makedepends=(
   lzo
   mesa
   meson
+  mold
   multipath-tools
   ncurses
   ndctl
@@ -103,14 +121,14 @@ source=(
   65-kvm.rules
   99-qemu-guest-agent.rules
 )
-sha512sums=('bd5ed682d51f974abd4be93f949701f9b5bfb87fd9929e31df130534da2f2c03b99adc9f924b3efd47d3b254e0e3c0046f4e69fbe9f6d0c4ac1f6babecb29449'
+sha512sums=('c5f5e7ce2d8e3c93a02012b136c866e8577df07da4705a0045916c71caeaa21fa1b2d59a4b22a660789a4159b192e12a443e7cbb0724ee85fea258251731724c'
             'SKIP'
             '7b412ffa5dcda47b0a4ec9e2c5e5e1d9eaaaf0a087b7ea3ead3e706ba4c9cafb919beadd088a0299b6f7aab753b81a5eafb545b4842ee5f26646d16544dd02a7'
             '6e838773d63ae0ffdffe2b891bf611d8f5f3c67a9bc4cbbedf8363c150c2c9971c8e44d92270bc581af40eb0ece02192760bcdd6aee229fff55635f3a4825afa'
             '985c2c7a6b5217c87a15b45368089ee91b2f9027b070f9eafa448a18b27ae0d9edd964d52e134b9c1f4aeef4d6aae88afd3f454551ca898affef7f9d28b99b8f'
             'bdf05f99407491e27a03aaf845b7cc8acfa2e0e59968236f10ffc905e5e3d5e8569df496fd71c887da2b5b8d1902494520c7da2d3a8258f7fd93a881dd610c99'
             '93b905046fcea8a0a89513b9259c222494ab3b91319dde23baebcb40dc17376a56661b159b99785d6e816831974a0f3cbd7b2f7d89e5fc3c258f88f4492f3839')
-b2sums=('dfb98964c629b251f0004b4630ae4500a52465579417d6f5c7dbbb1f672e10d8d7ffb98a4b00e26fb98b3c867208146dbdca026e4d30cbf1752ac733c4d9b915'
+b2sums=('b0fd87a19b13d4bbc6526caa46533073cb4dee6004df5d4fbbef204ee3bc8c2f10ec1eaff554adbb25c9f3143dd68abd09d4a0519c4766299a3ff261d03c73f2'
         'SKIP'
         'b1eca364aa60f130ff5e649f5d004d3fcb75356d3421a4542efdfc410d39b40d9434d15e1dd7bbdbd315cb72b5290d3ea5f77f9c41961a5601cd28ef7bbe72e8'
         '2102e4a34e11e406e9606c97e026e7b92e887e296a7f77b9cede1b37119d0df33735f3588628167b2b8e32244c196c491bfab623e2caddac9014d445aa2a6d98'
@@ -195,6 +213,7 @@ _qemu_base_optdepends=(
   'qemu-audio-jack: for JACK audio driver'
   'qemu-audio-oss: for OSS audio driver'
   'qemu-audio-pa: for PulseAudio audio driver'
+  'qemu-audio-pipewire: for PipeWire audio driver'
   'qemu-audio-sdl: for SDL audio driver'
   'qemu-audio-spice: for spice audio driver'
   'qemu-block-curl: for curl block driver'
@@ -203,9 +222,9 @@ _qemu_base_optdepends=(
   'qemu-block-ssh: for SSH block driver'
   'qemu-chardev-spice: for the spice chardev driver'
   'qemu-desktop: for dependencies commonly used on a desktop'
+  'qemu-hw-display-qxl: for the QXL display device'
   'qemu-hw-display-virtio-vga: for the virtio-vga display device'
   'qemu-hw-display-virtio-vga-gl: for the virtio-vga-gl display device'
-  'qemu-hw-display-qxl: for the QXL display device'
   'qemu-hw-display-virtio-gpu: for the virtio-gpu display device'
   'qemu-hw-display-virtio-gpu-gl: for the virtio-gpu-gl display device'
   'qemu-hw-display-virtio-gpu-pci: for the virtio-gpu-pci display device'
@@ -229,9 +248,9 @@ _pick() {
   local p="$1" f d; shift
   for f; do
     d="$srcdir/$p/${f#$pkgdir/}"
-    mkdir -p "$(dirname "$d")"
-    mv "$f" "$d"
-    rmdir -p --ignore-fail-on-non-empty "$(dirname "$f")"
+    mkdir -vp "$(dirname "$d")"
+    mv -v "$f" "$d"
+    rmdir -vp --ignore-fail-on-non-empty "$(dirname "$f")"
   done
 }
 
@@ -306,6 +325,8 @@ build() {
     --static
   )
 
+  LDFLAGS+=" -fuse-ld=mold"
+
   (
     cd build-static
     ../$pkgbase-$pkgver/configure "${configure_static_options[@]}"
@@ -333,7 +354,6 @@ package_qemu-common() {
     --preserve-argv0 yes
   )
 
-  license+=(BSD MIT)
   depends=(gcc-libs glibc glib2 libglib-2.0.so libgmodule-2.0.so hicolor-icon-theme libcap-ng libcap-ng.so numactl libnuma.so)
   backup=(
     etc/$pkgbase/bridge.conf
@@ -405,6 +425,7 @@ package_qemu-common() {
     _pick qemu-audio-jack usr/lib/qemu/audio-jack.so
     _pick qemu-audio-oss usr/lib/qemu/audio-oss.so
     _pick qemu-audio-pa usr/lib/qemu/audio-pa.so
+    _pick qemu-audio-pipewire usr/lib/qemu/audio-pipewire.so
     _pick qemu-audio-sdl usr/lib/qemu/audio-sdl.so
     _pick qemu-audio-spice usr/lib/qemu/audio-spice.so
 
@@ -574,7 +595,7 @@ package_qemu-audio-dbus() {
 
 package_qemu-audio-jack() {
   pkgdesc="QEMU JACK audio driver"
-  depends=(jack libjack.so glibc qemu-common=$pkgver-$pkgrel)
+  depends=(glibc jack libjack.so qemu-common=$pkgver-$pkgrel)
   mv -v $pkgname/* "$pkgdir"
 }
 
@@ -587,6 +608,12 @@ package_qemu-audio-oss() {
 package_qemu-audio-pa() {
   pkgdesc="QEMU PulseAudio audio driver"
   depends=(glibc libpulse libpulse.so qemu-common=$pkgver-$pkgrel)
+  mv -v $pkgname/* "$pkgdir"
+}
+
+package_qemu-audio-pipewire() {
+  pkgdesc="QEMU PipeWire audio driver"
+  depends=(gcc-libs glibc libpipewire libpipewire-0.3.so qemu-common=$pkgver-$pkgrel)
   mv -v $pkgname/* "$pkgdir"
 }
 
@@ -1060,7 +1087,7 @@ package_qemu-desktop() {
   pkgdesc="A QEMU setup for desktop environments"
   depends=(
     qemu-base=$pkgver-$pkgrel
-    qemu-audio-{alsa,dbus,jack,oss,pa,sdl,spice}=$pkgver-$pkgrel
+    qemu-audio-{alsa,dbus,jack,oss,pa,pipewire,sdl,spice}=$pkgver-$pkgrel
     qemu-block-{curl,dmg,nfs,ssh}=$pkgver-$pkgrel
     qemu-chardev-spice=$pkgver-$pkgrel
     qemu-hw-display-{qxl,virtio-gpu{,-{gl,pci,pci-gl}}}=$pkgver-$pkgrel
