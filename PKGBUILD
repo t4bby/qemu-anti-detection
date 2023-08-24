@@ -25,7 +25,7 @@ pkgname=(
   qemu-{base,desktop,emulators-full,full}
 )
 pkgver=8.1.0
-pkgrel=1
+pkgrel=2
 pkgdesc="A generic and open source machine emulator and virtualizer"
 arch=(x86_64)
 url="https://www.qemu.org/"
@@ -68,6 +68,7 @@ makedepends=(
   gnutls
   gtk3
   jack
+  keyutils
   libaio
   libbpf
   libcacard
@@ -90,7 +91,6 @@ makedepends=(
   lzo
   mesa
   meson
-  mold
   multipath-tools
   ncurses
   ndctl
@@ -98,6 +98,9 @@ makedepends=(
   pam
   pcre2
   python
+  python-distlib
+  python-setuptools
+  python-pip
   python-sphinx
   python-sphinx_rtd_theme
   sdl2
@@ -120,6 +123,7 @@ source=(
   qemu-sysusers.conf
   65-kvm.rules
   99-qemu-guest-agent.rules
+  $pkgbase-8.1.0-keyutils.patch
 )
 sha512sums=('c5f5e7ce2d8e3c93a02012b136c866e8577df07da4705a0045916c71caeaa21fa1b2d59a4b22a660789a4159b192e12a443e7cbb0724ee85fea258251731724c'
             'SKIP'
@@ -127,14 +131,16 @@ sha512sums=('c5f5e7ce2d8e3c93a02012b136c866e8577df07da4705a0045916c71caeaa21fa1b
             '6e838773d63ae0ffdffe2b891bf611d8f5f3c67a9bc4cbbedf8363c150c2c9971c8e44d92270bc581af40eb0ece02192760bcdd6aee229fff55635f3a4825afa'
             '985c2c7a6b5217c87a15b45368089ee91b2f9027b070f9eafa448a18b27ae0d9edd964d52e134b9c1f4aeef4d6aae88afd3f454551ca898affef7f9d28b99b8f'
             'bdf05f99407491e27a03aaf845b7cc8acfa2e0e59968236f10ffc905e5e3d5e8569df496fd71c887da2b5b8d1902494520c7da2d3a8258f7fd93a881dd610c99'
-            '93b905046fcea8a0a89513b9259c222494ab3b91319dde23baebcb40dc17376a56661b159b99785d6e816831974a0f3cbd7b2f7d89e5fc3c258f88f4492f3839')
+            '93b905046fcea8a0a89513b9259c222494ab3b91319dde23baebcb40dc17376a56661b159b99785d6e816831974a0f3cbd7b2f7d89e5fc3c258f88f4492f3839'
+            '400cca1177bd72ac1dfe646a2197754a1829116ade02cb4b0dea817f62a62ff3324675f772cdacd58ae74cff6147bf04a249dabb9729df6678500d47f7e728a8')
 b2sums=('b0fd87a19b13d4bbc6526caa46533073cb4dee6004df5d4fbbef204ee3bc8c2f10ec1eaff554adbb25c9f3143dd68abd09d4a0519c4766299a3ff261d03c73f2'
         'SKIP'
         'b1eca364aa60f130ff5e649f5d004d3fcb75356d3421a4542efdfc410d39b40d9434d15e1dd7bbdbd315cb72b5290d3ea5f77f9c41961a5601cd28ef7bbe72e8'
         '2102e4a34e11e406e9606c97e026e7b92e887e296a7f77b9cede1b37119d0df33735f3588628167b2b8e32244c196c491bfab623e2caddac9014d445aa2a6d98'
         '69177b962d2fda20cafdbc6226fd017b5ca5a0f69f866d055dc1c744b7b2955059f47c693cfb5b4c863ec159569fdabd4327ab4b8a95566a68cd8ce38e339c7a'
         '3559fe9c4f744194939770047a0a02d07ff791c845a80726d0bc7b8c4801ed5f11150e7d5adab813844b3dab1cf38c3a5a87fb6efbb8fc9dccdda9fa56409ed8'
-        'a9a2bdfeeb44eb86cbe88ac7c65f72800bdb2fd5cecb02f3a258cf9470b52832180aab43c89d481f7fd4d067342a9a27dd6c8a94d625b95d6e2b912e47d274e7')
+        'a9a2bdfeeb44eb86cbe88ac7c65f72800bdb2fd5cecb02f3a258cf9470b52832180aab43c89d481f7fd4d067342a9a27dd6c8a94d625b95d6e2b912e47d274e7'
+        '3608b43b4751554a7f1ff74ecdb161625bb565b083b471df4e13be0f98b556992f4c707760610b87d02cb5bd11cec5b59a3b4c59024c4a791acfb80f720c2c0e')
 validpgpkeys=('CEACC9E15534EBABB82D3FA03353C9CEF108B584') # Michael Roth <flukshun@gmail.com>
 
 _qemu_system_deps=(
@@ -256,6 +262,9 @@ _pick() {
 
 prepare() {
 
+  # fix detection of keyutils: https://gitlab.com/qemu-project/qemu/-/issues/1842
+  patch -Np1 -d $pkgbase-$pkgver -i ../$pkgbase-8.1.0-keyutils.patch
+
   # extract licenses for TCG
   sed -n '1,23p' $pkgbase-$pkgver/tcg/tcg-internal.h > tcg.LICENSE.MIT
   sed -n '1,23p' $pkgbase-$pkgver/tcg/arm/tcg-target.c.inc > tcg-arm.LICENSE.MIT
@@ -324,8 +333,6 @@ build() {
     --disable-zstd
     --static
   )
-
-  LDFLAGS+=" -fuse-ld=mold"
 
   (
     cd build-static
@@ -673,7 +680,7 @@ package_qemu-chardev-baum() {
 
 package_qemu-chardev-spice() {
   pkgdesc="QEMU spice chardev driver"
-  depends=(libspice-server.so glibc qemu-common=$pkgver-$pkgrel qemu-ui-spice-core=$pkgver-$pkgrel)
+  depends=(glibc qemu-common=$pkgver-$pkgrel qemu-ui-spice-core=$pkgver-$pkgrel spice libspice-server.so)
   mv -v $pkgname/* "$pkgdir"
 }
 
@@ -874,7 +881,7 @@ package_qemu-system-rx() {
 
 package_qemu-system-s390x() {
   pkgdesc="QEMU system emulator for S390"
-  depends=("${_qemu_system_deps[@]}" qemu-system-s390x-firmware=$pkgver-$pkgrel)
+  depends=("${_qemu_system_deps[@]}" qemu-system-s390x-firmware=$pkgver-$pkgrel systemd-libs libudev.so)
   mv -v $pkgname/* "$pkgdir"
 }
 
@@ -1052,7 +1059,6 @@ package_qemu-user-binfmt() {
 
 package_qemu-user-static() {
   pkgdesc="QEMU static user mode emulation"
-  depends=(glibc)
   optdepends=('qemu-user-static-binfmt: for binary format rules')
   mv -v $pkgname/* "$pkgdir"
 }
