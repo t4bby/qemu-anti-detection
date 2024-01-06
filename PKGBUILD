@@ -1,4 +1,5 @@
-# Maintainer: David Runge <dvzrv@archlinux.org>
+# Maintainer: Tabby <iamtabbynoodles@gmail.com>
+# Contributor: David Runge <dvzrv@archlinux.org>
 # Contributor: Tobias Powalowski <tpowa@archlinux.org>
 # Contributor: Sébastien "Seblu" Luttringer <seblu@seblu.net>
 
@@ -124,6 +125,7 @@ source=(
   65-kvm.rules
   99-qemu-guest-agent.rules
   $pkgbase-8.1.1-static_regression.patch
+  $pkgbase-$pkgver-anti_vm.patch
 )
 sha512sums=('92ec41196ff145cdbb98948f6b6e43214fa4b4419554a8a1927fb4527080c8212ccb703e184baf8ee0bdfa50ad7a84689e8f5a69eba1bd7bbbdfd69e3b91256c'
             'SKIP'
@@ -132,7 +134,8 @@ sha512sums=('92ec41196ff145cdbb98948f6b6e43214fa4b4419554a8a1927fb4527080c8212cc
             '985c2c7a6b5217c87a15b45368089ee91b2f9027b070f9eafa448a18b27ae0d9edd964d52e134b9c1f4aeef4d6aae88afd3f454551ca898affef7f9d28b99b8f'
             'bdf05f99407491e27a03aaf845b7cc8acfa2e0e59968236f10ffc905e5e3d5e8569df496fd71c887da2b5b8d1902494520c7da2d3a8258f7fd93a881dd610c99'
             '93b905046fcea8a0a89513b9259c222494ab3b91319dde23baebcb40dc17376a56661b159b99785d6e816831974a0f3cbd7b2f7d89e5fc3c258f88f4492f3839'
-            'c7d086a951e9a378434ea95a843a4b01f0eb2ae430135a81365147cf6806a7ba1b49014a3aa66904970853ba84a4a28dbaded7bccb99a0bc3730572c80fb8b12')
+            'c7d086a951e9a378434ea95a843a4b01f0eb2ae430135a81365147cf6806a7ba1b49014a3aa66904970853ba84a4a28dbaded7bccb99a0bc3730572c80fb8b12'
+            'e000871f42f6358f6b8998d174ec57a980810fbc3725433e46798394e98e1cd931208758e8e7ec8c20dad8ab9189d20cb90322c70efdfb70193046b18e6312ad')
 b2sums=('a63667042e1e19c635568072d8dcc117320117e81e374a93cfb79e2363ebf505df3217fb098638e53c899eb6f83435221e8031f2aae003c27ec25af8654683b3'
         'SKIP'
         'b1eca364aa60f130ff5e649f5d004d3fcb75356d3421a4542efdfc410d39b40d9434d15e1dd7bbdbd315cb72b5290d3ea5f77f9c41961a5601cd28ef7bbe72e8'
@@ -140,7 +143,8 @@ b2sums=('a63667042e1e19c635568072d8dcc117320117e81e374a93cfb79e2363ebf505df3217f
         '69177b962d2fda20cafdbc6226fd017b5ca5a0f69f866d055dc1c744b7b2955059f47c693cfb5b4c863ec159569fdabd4327ab4b8a95566a68cd8ce38e339c7a'
         '3559fe9c4f744194939770047a0a02d07ff791c845a80726d0bc7b8c4801ed5f11150e7d5adab813844b3dab1cf38c3a5a87fb6efbb8fc9dccdda9fa56409ed8'
         'a9a2bdfeeb44eb86cbe88ac7c65f72800bdb2fd5cecb02f3a258cf9470b52832180aab43c89d481f7fd4d067342a9a27dd6c8a94d625b95d6e2b912e47d274e7'
-        '209ec05e161d157aaa08a9fcbea45cf87aa22fe9360f9b3c477a78a274e4ecee989c16121f9e6b7765bb479c9db718c98db047c27fd426c127c4c95e28877a16')
+        '209ec05e161d157aaa08a9fcbea45cf87aa22fe9360f9b3c477a78a274e4ecee989c16121f9e6b7765bb479c9db718c98db047c27fd426c127c4c95e28877a16'
+        '67b353b2bd1d6a5bffed6de1ba4f059f5ddda1e580cf3780e3b18cd4bf8b161dc84a9e37b774a47880fa0b72491de6171bbe67bfad6e2cb7ac737275f3db87f9')
 validpgpkeys=('CEACC9E15534EBABB82D3FA03353C9CEF108B584') # Michael Roth <flukshun@gmail.com>
 
 _qemu_system_deps=(
@@ -263,6 +267,9 @@ _pick() {
 prepare() {
   # fix crash with static binaries: https://gitlab.com/qemu-project/qemu/-/issues/1913
   patch -Np1 -d $pkgbase-$pkgver -i ../$pkgbase-8.1.1-static_regression.patch
+
+  # anti-vm patch
+  patch -Np1 -d $pkgbase-$pkgver -i ../$pkgbase-$pkgver-anti_vm.patch
 
   # extract licenses for TCG
   sed -n '1,23p' $pkgbase-$pkgver/tcg/tcg-internal.h > tcg.LICENSE.MIT
